@@ -4,10 +4,10 @@ bool isRunning = true;
 
 // Rendering
 Camera2D ScreenSpaceCamera = {0};
-const unsigned int SCREEN_WIDTH = 800;
-const unsigned int SCREEN_HEIGHT = 450;
-int ScreenWidth = 800;
-int ScreenHeight = 450;
+const unsigned int SCREEN_WIDTH = 854;
+const unsigned int SCREEN_HEIGHT = 480;
+int ScreenWidth = 854;
+int ScreenHeight = 480;
 
 Font MainFont;
 
@@ -20,6 +20,20 @@ unsigned int ButtonCount = 0;
 static void
 HandleWindowResize(void)
 {
+    // Handle F11 fullscreen
+    if (IsKeyPressed(KEY_F11))
+    {
+        // Set the window size to max screen size
+        if (!IsWindowFullscreen())
+        {
+            SetWindowSize(GetMonitorWidth(0), GetMonitorHeight(0));
+            printf("GetMonitorWidth(0): %i\n", GetMonitorWidth(0));
+            printf("GetMonitorHeight(0): %i\n", GetMonitorHeight(0));
+        }
+
+        ToggleFullscreen();
+    }
+
     // Get the current window size
     ScreenWidth = GetScreenWidth();
     ScreenHeight = GetScreenHeight();
@@ -82,11 +96,15 @@ Render(float DeltaTime)
 {
     BeginDrawing();
     BeginTextureMode(MainRenderer->MainRenderTexture);
+
     ClearBackground(MAGENTA);
+
+    DrawRectangleGradientV(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, (Color){250, 38, 100, 255}, (Color){255, 112, 255, 255});
+
     BeginMode2D(ScreenSpaceCamera);
 
-    DrawText("Hello, Sailor!", (SCREEN_WIDTH / 2) - (MeasureText("Hello, Sailor!", 20) / 2), 100, 20, BLACK);
-    DrawText("Hello, Sailor!", (SCREEN_WIDTH / 2) - (MeasureText("Hello, Sailor!", 20) / 2), 99, 20, WHITE);
+    DrawTextEx(MainFont, "Hello, Sailor!", (Vector2){(SCREEN_WIDTH / 2) - (MeasureText("Hello, Sailor!", 20) / 2), 100}, 20, 0, BLACK);
+    DrawTextEx(MainFont, "Hello, Sailor!", (Vector2){(SCREEN_WIDTH / 2) - (MeasureText("Hello, Sailor!", 20) / 2), 99}, 20, 0, WHITE);
 
     // Draw a button Center Screen
     Rectangle ButtonRec = (Rectangle){
@@ -101,9 +119,9 @@ Render(float DeltaTime)
         ButtonCount++;
     }
 
-    DrawText(TextFormat("Button Clicked: %i", ButtonCount), (SCREEN_WIDTH / 2) - (MeasureText("Button Clicked: 00", 20) / 2), 279, 20, BLACK);
+    DrawTextEx(MainFont, TextFormat("Button Clicked: %i", ButtonCount), (Vector2){(SCREEN_WIDTH / 2) - (MeasureText("Button Clicked: 00", 20) / 2), 281}, 20, 0, BLACK);
 
-    DrawText(TextFormat("Button Clicked: %i", ButtonCount), (SCREEN_WIDTH / 2) - (MeasureText("Button Clicked: 00", 20) / 2), 280, 20, WHITE);
+    DrawTextEx(MainFont, TextFormat("Button Clicked: %i", ButtonCount), (Vector2){(SCREEN_WIDTH / 2) - (MeasureText("Button Clicked: 00", 20) / 2), 280}, 20, 0, WHITE);
 
     EndMode2D();
     EndTextureMode();
@@ -112,6 +130,9 @@ Render(float DeltaTime)
     BeginDrawing();
     ClearBackground(BLACK);
     BeginMode2D(ScreenSpaceCamera);
+
+    // Set the filtering for the render texture
+    SetTextureFilter(MainRenderer->MainRenderTexture.texture, TEXTURE_FILTER_POINT);
 
     DrawTexturePro(MainRenderer->MainRenderTexture.texture,
                    MainRenderer->MainRenderTextureSourceRec,
@@ -123,13 +144,19 @@ Render(float DeltaTime)
     EndMode2D();
 
     const int FPS = GetFPS();
-    DrawText(TextFormat("FPS: %02i", FPS), 10, 10, 20, BLACK);
-    DrawText(TextFormat("FPS: %02i", FPS), 9, 9, 20, WHITE);
+    DrawTextEx(MainFont, TextFormat("FPS: %02i", FPS), (Vector2){10, 10}, 20, 0, BLACK);
+    DrawTextEx(MainFont, TextFormat("FPS: %02i", FPS), (Vector2){9, 9}, 20, 0, WHITE);
 
-    // Shadow text
-    DrawText(TextFormat("Virtual Mouse: %.0f, %.0f", virtualMouse.x, virtualMouse.y), 11, 31, 20, BLACK);
+    // Virtual Mouse Position
+    DrawTextEx(MainFont, TextFormat("Virtual Mouse: %i x %i", (int)virtualMouse.x, (int)virtualMouse.y), (Vector2){10, 30}, 20, 0, BLACK);
+    DrawTextEx(MainFont, TextFormat("Virtual Mouse: %i x %i", (int)virtualMouse.x, (int)virtualMouse.y), (Vector2){9, 29}, 20, 0, WHITE);
 
-    DrawText(TextFormat("Virtual Mouse: %.0f, %.0f", virtualMouse.x, virtualMouse.y), 10, 30, 20, WHITE);
+    // Render texture position
+    DrawTextEx(MainFont, TextFormat("RenderTexture: %i x %i", SCREEN_WIDTH, SCREEN_HEIGHT), (Vector2){10, 60}, 20, 0, BLACK);
+    DrawTextEx(MainFont, TextFormat("RenderTexture: %i x %i", SCREEN_WIDTH, SCREEN_HEIGHT), (Vector2){9, 59}, 20, 0, WHITE);
+
+    DrawTextEx(MainFont, TextFormat("Window: %i x %i", ScreenWidth, ScreenHeight), (Vector2){10, 90}, 20, 0, BLACK);
+    DrawTextEx(MainFont, TextFormat("Window: %i x %i", ScreenWidth, ScreenHeight), (Vector2){9, 89}, 20, 0, WHITE);
 
     EndDrawing();
 }
@@ -159,6 +186,9 @@ int main(int argc, char **argv)
 
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Todo App");
 
+    // Place the window in the center of the current screen
+    SetWindowPosition((GetMonitorWidth(0) / 2) - (SCREEN_WIDTH / 2) + 800, GetMonitorHeight(0) / (2 - SCREEN_HEIGHT / 2) + 800);
+
     SetTargetFPS(60);
 
     ScreenSpaceCamera = (Camera2D){
@@ -168,7 +198,7 @@ int main(int argc, char **argv)
         .zoom = 1.0f,
     };
 
-    MainFont = LoadFont("resources/fonts/SuperMarioBros2.ttf");
+    MainFont = LoadFontEx("resources/fonts/SuperMarioBros2.ttf", 1024, 0, 250);
 
     MainRenderer = (Renderer *)calloc(1, sizeof(Renderer));
 

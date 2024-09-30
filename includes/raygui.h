@@ -24,7 +24,7 @@
  *       - Standalone mode requires library modification and some user work to plug another backend
  *
  *   NOTES:
- *       - WARNING: GuiLoadStyle() and GuiLoadStyle{Custom}() functions, allocate memory for
+ *       - WARNING: GuiLoaGStyle() and GuiLoadStyle{Custom}() functions, allocate memory for
  *         font atlas recs and glyphs, freeing that memory is (usually) up to the user,
  *         no unload function is explicitly provided... but note that GuiLoadStyleDefaulf() unloads
  *         by default any previously loaded font (texture, recs, glyphs).
