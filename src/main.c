@@ -50,11 +50,9 @@ HandleWindowResize(void)
         ToggleFullscreen();
     }
 
-    // Get the current window size
     ScreenWidth = GetScreenWidth();
     ScreenHeight = GetScreenHeight();
 
-    // Calculate aspect ratios
     float aspectRatio = (float)ScreenWidth / (float)ScreenHeight;
     float targetAspectRatio = (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT;
 
@@ -76,7 +74,6 @@ HandleWindowResize(void)
         MainRenderer->MainRenderTextureDestRec = (Rectangle){0, offsetY, letterboxWidth, letterboxHeight};
     }
 
-    // Update the mouse position
     Vector2 mouse = GetMousePosition();
     float scaleX = (float)GetScreenWidth() / SCREEN_WIDTH;
     float scaleY = (float)GetScreenHeight() / SCREEN_HEIGHT;
@@ -147,7 +144,6 @@ Render(float DeltaTime)
     ClearBackground(BLACK);
     BeginMode2D(ScreenSpaceCamera);
 
-    // Set the filtering for the render texture
     SetTextureFilter(MainRenderer->MainRenderTexture.texture, TEXTURE_FILTER_POINT);
 
     DrawTexturePro(MainRenderer->MainRenderTexture.texture,
@@ -192,16 +188,9 @@ HandleInputArgs(int argc, char **argv)
     }
 }
 
-int main(int argc, char **argv)
+static void
+InitGame(void)
 {
-    HandleInputArgs(argc, argv);
-
-    printf("Hello, Sailor!\n");
-
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
-
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Todo App");
-
     // Place the window in the center of the current screen
     SetWindowPosition((GetMonitorWidth(0) / 2) - (SCREEN_WIDTH / 2) + 800, GetMonitorHeight(0) / (2 - SCREEN_HEIGHT / 2) + 800);
 
@@ -236,7 +225,21 @@ int main(int argc, char **argv)
         (float)(GetScreenWidth() + (MainRenderer->virtualRatio)),
         (float)(GetScreenHeight() + (MainRenderer->virtualRatio)),
     };
+}
 
+int main(int argc, char **argv)
+{
+    HandleInputArgs(argc, argv);
+
+    printf("Hello, Sailor!\n");
+
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
+
+    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Todo App");
+
+    InitGame();
+
+    // Main Game Loop
     while (!WindowShouldClose())
     {
         const float DeltaTime = GetFrameTime();
