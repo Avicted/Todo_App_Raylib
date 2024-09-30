@@ -1,8 +1,6 @@
 #include "includes.h"
 
-bool isRunning = true;
-
-// Rendering
+// Rendering -------------------------------------------------------------------
 Camera2D ScreenSpaceCamera = {0};
 const unsigned int SCREEN_WIDTH = 854;
 const unsigned int SCREEN_HEIGHT = 480;
@@ -14,8 +12,26 @@ Font MainFont;
 Renderer *MainRenderer;
 Vector2 virtualMouse = {0};
 
-// Game Specific Functions and Variables
+// Game Specific Functions and Variables ---------------------------------------
+bool isRunning = true;
+
 unsigned int ButtonCount = 0;
+
+typedef enum TODO_STATE
+{
+    TODO_STATE_NOT_STARTED,
+    TODO_STATE_IN_PROGRESS,
+    TODO_STATE_COMPLETED,
+} TODO_STATE;
+
+typedef struct TodoItem
+{
+    char *Title;
+    char *Description;
+    TODO_STATE TODO_STATE_NOT_STARTED;
+} TodoItem;
+
+// -----------------------------------------------------------------------------
 
 static void
 HandleWindowResize(void)
