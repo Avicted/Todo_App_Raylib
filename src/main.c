@@ -238,10 +238,11 @@ Render(float DeltaTime)
     const int TodoItemXPos = (GetScreenWidth() / 2) - (TodoItemWidth / 2);
 
     // Draw the Todo items
+    const int topMargin = 32;
+
     for (int i = 0; i < TodoItemCount; i++)
     {
-        // Adjust item Y position based on the camera's offset
-        float itemYPos = i * TodoItemHeight - offsetY;
+        float itemYPos = i * TodoItemHeight - offsetY + topMargin;
 
         // Draw the rectangle for the Todo item
         Color itemColor = (i == SelectedTodoItem) ? WHITE : LIGHTGRAY;
@@ -258,7 +259,7 @@ Render(float DeltaTime)
     // Draw a Green Rectangle around the selected Todo Item
     if (SelectedTodoItem >= 0 && SelectedTodoItem < TodoItemCount)
     {
-        float selectedYPos = SelectedTodoItem * TodoItemHeight - offsetY;
+        float selectedYPos = SelectedTodoItem * TodoItemHeight - offsetY + topMargin;
         DrawRectangleLines(TodoItemXPos, selectedYPos, TodoItemWidth, TodoItemHeight, GREEN);
     }
 
