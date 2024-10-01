@@ -39,7 +39,7 @@ bool ShowTodoItemDetails = false;
 
 float offsetY = 0.0f;           // Vertical offset for scrolling
 const float scrollSpeed = 0.5f; // Speed of scrolling
-const int TodoItemHeight = 64;
+const int TodoItemHeight = 128;
 const int TodoItemWidth = 854 * 0.75;
 
 // -----------------------------------------------------------------------------
@@ -239,10 +239,11 @@ Render(float DeltaTime)
 
     // Draw the Todo items
     const int topMargin = 32;
+    const int marginBetweenItems = 16;
 
     for (int i = 0; i < TodoItemCount; i++)
     {
-        float itemYPos = i * TodoItemHeight - offsetY + topMargin;
+        float itemYPos = i * TodoItemHeight - offsetY + topMargin + (marginBetweenItems * i);
 
         // Draw the rectangle for the Todo item
         Color itemColor = (i == SelectedTodoItem) ? WHITE : LIGHTGRAY;
@@ -251,9 +252,9 @@ Render(float DeltaTime)
 
         const int XLeftPadding = 10;
         DrawTextEx(MainFont, TodoItems[i].Title,
-                   (Vector2){TodoItemXPos + XLeftPadding, itemYPos + 5}, 16, 0, BLACK);
+                   (Vector2){TodoItemXPos + XLeftPadding, itemYPos + 5}, 32, 0, BLACK);
         DrawTextEx(MainFont, TodoItems[i].Description,
-                   (Vector2){TodoItemXPos + XLeftPadding, itemYPos + 30}, 12, 0, BLACK);
+                   (Vector2){TodoItemXPos + XLeftPadding, itemYPos + 42}, 16, 0, BLACK);
     }
 
     // Draw a Green Rectangle around the selected Todo Item
@@ -398,7 +399,8 @@ InitGame(void)
         .zoom = 1.0f,
     };
 
-    MainFont = LoadFontEx("resources/fonts/SuperMarioBros2.ttf", 1024, 0, 250);
+    // MainFont = LoadFontEx("resources/fonts/SuperMarioBros2.ttf", 1024, 0, 250);
+    MainFont = LoadFontEx("resources/fonts/upheavtt.ttf", 1024, 0, 250);
 
     MainRenderer = (Renderer *)calloc(1, sizeof(Renderer));
 
@@ -429,7 +431,7 @@ InitGame(void)
     AddTodoItem("Test Todo Item", "This is a test todo item.", TODO_STATE_NOT_STARTED);
     AddTodoItem("Test Todo Item 2", "This is a test todo item 2.", TODO_STATE_NOT_STARTED);
     AddTodoItem("Test Todo Item 3", "This is a test todo item 3.", TODO_STATE_IN_PROGRESS);
-    AddTodoItem("Test Todo Item 4", "This is a test todo item 4.", TODO_STATE_COMPLETED);
+    AddTodoItem("Test Todo Item 4", "This is a test todo item 4. This is a test todo item 4.This is a test todo item 4.This is a test todo item 4.This is a test todo item 4.This is a test todo item 4.This is a test todo item 4.This is a test todo item 4.This is a test todo item 4.", TODO_STATE_COMPLETED);
     AddTodoItem("Test Todo Item 5", "This is a test todo item 5.", TODO_STATE_NOT_STARTED);
     AddTodoItem("Test Todo Item 6", "This is a test todo item 6.", TODO_STATE_IN_PROGRESS);
     AddTodoItem("Test Todo Item 7", "This is a test todo item 7.", TODO_STATE_COMPLETED);
@@ -443,7 +445,7 @@ InitGame(void)
     AddTodoItem("Test Todo Item 15", "This is a test todo item 15.", TODO_STATE_IN_PROGRESS);
     AddTodoItem("Test Todo Item 16", "This is a test todo item 16.", TODO_STATE_COMPLETED);
     AddTodoItem("Test Todo Item 17", "This is a test todo item 17.", TODO_STATE_NOT_STARTED);
-    AddTodoItem("Test Todo Item 18 123 Longer Title", "This is a test todo item 18.", TODO_STATE_IN_PROGRESS);
+    AddTodoItem("Test Todo Item 18 123 Longer Title ÅÄÖ 123 abc", "This is a test todo item 18.", TODO_STATE_IN_PROGRESS);
 }
 
 int main(int argc, char **argv)
