@@ -3,7 +3,7 @@
 The Renderer keeps the aspect ratio at 16:9 at all times.
 
 
-## In Progress:
+## Work In Progress!
 ### Todo App in C with Raylib and RayGUI
 
 - [x] Create a 16:9 window with Raylib
