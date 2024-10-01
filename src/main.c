@@ -260,8 +260,8 @@ Render(float DeltaTime)
     // Draw a Green Rectangle around the selected Todo Item
     if (SelectedTodoItem >= 0 && SelectedTodoItem < TodoItemCount)
     {
-        float selectedYPos = SelectedTodoItem * TodoItemHeight - offsetY + topMargin;
-        DrawRectangleLines(TodoItemXPos, selectedYPos, TodoItemWidth, TodoItemHeight, GREEN);
+        float selectedYPos = SelectedTodoItem * TodoItemHeight - offsetY + topMargin + (marginBetweenItems * SelectedTodoItem);
+        DrawRectangleLinesEx((Rectangle){TodoItemXPos, selectedYPos, TodoItemWidth, TodoItemHeight}, 4, GREEN);
     }
 
     // Draw Todo Item Details modal if ShowTodoItemDetails is true
