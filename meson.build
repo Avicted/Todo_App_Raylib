@@ -38,4 +38,3 @@ exe = executable(
     link_args: linker_args,
     install: false,
 )
-

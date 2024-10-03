@@ -212,6 +212,29 @@ DrawTextBoxed(
     DrawTextBoxedSelectable(font, text, rec, fontSize, spacing, wordWrap, tint, 0, 0, WHITE, WHITE);
 }
 
+static TodoItem *
+GetSelectedTodoItem(void)
+{
+    if (SelectedTodoItem >= 0 && SelectedTodoItem < TodoItemCount)
+    {
+        return &TodoItems[SelectedTodoItem];
+    }
+
+    return NULL;
+}
+
+static void
+SaveTodoItem(void)
+{
+    // TODO: Implement control logic
+}
+
+static void
+CancelButton()
+{
+    // TODO: Implement control logic
+}
+
 static void
 AddTodoItem(const char *title, const char *description, TODO_STATE state)
 {
@@ -327,9 +350,7 @@ Update(float DeltaTime)
     {
         Vector2 MouseWorldPos = GetScreenToWorld2D(GetMousePosition(), ScreenSpaceCamera);
 
-        ScreenSpaceCamera.offset = GetMousePosition();
-
-        ScreenSpaceCamera.target = MouseWorldPos;
+        // Zoom from the center of the screen
 
         ScreenSpaceCamera.zoom += Wheel * 0.0125f;
         if (ScreenSpaceCamera.zoom < 0.125f)
@@ -441,49 +462,6 @@ Render(float DeltaTime)
         DrawRectangleLinesEx((Rectangle){TodoItemXPos, selectedYPos, TodoItemWidth, TodoItemHeight}, 4, GREEN);
     }
 
-    // Draw Todo Item Details modal if ShowTodoItemDetails is true
-    if (ShowTodoItemDetails)
-    {
-        const int PosY = (GetScreenHeight() / 2) - (GetScreenHeight() / 10);
-        const int Width = GetScreenWidth() / 3;
-        const int Height = GetScreenHeight() / 5;
-        Rectangle ModalRec = (Rectangle){
-            (GetScreenWidth() / 2) - (Width / 2),
-            PosY,
-            Width,
-            Height};
-
-        GuiWindowBox(ModalRec, "Todo Item Details");
-
-        // Set GuiLabel style
-        GuiSetFont(MainFont);
-        GuiSetStyle(LABEL, TEXT_SIZE, 16);
-        GuiSetStyle(LABEL, TEXT_PADDING, 10);
-
-        // Item Title
-        GuiLabel((Rectangle){ModalRec.x + 10, ModalRec.y + 30, 0, 0}, "Item Title");
-        GuiLabel((Rectangle){ModalRec.x + 10, ModalRec.y + 50, 0, 0}, TodoItems[SelectedTodoItem].Title);
-
-        // Item Description
-        GuiLabel((Rectangle){ModalRec.x + 10, ModalRec.y + 80, 0, 0}, "Item Description");
-        GuiLabel((Rectangle){ModalRec.x + 10, ModalRec.y + 100, 0, 0}, TodoItems[SelectedTodoItem].Description);
-
-        // Item State
-        const char *StateText = "Not Started";
-        if (TodoItems[SelectedTodoItem].State == TODO_STATE_IN_PROGRESS)
-        {
-            StateText = "In Progress";
-        }
-        else if (TodoItems[SelectedTodoItem].State == TODO_STATE_COMPLETED)
-        {
-            StateText = "Completed";
-        }
-
-        GuiLabel((Rectangle){ModalRec.x + 10, ModalRec.y + 130, 0, 0}, "Item State");
-        GuiLabel((Rectangle){ModalRec.x + 10, ModalRec.y + 150, 0, 0}, StateText);
-    }
-
-    EndMode2D();
     // EndTextureMode();
 
     // Draw the render texture in the window
@@ -507,9 +485,95 @@ Render(float DeltaTime)
                    0.0f,
                    WHITE);*/
 
+    EndMode2D();
+
     DrawRectangleLinesEx((Rectangle){MainRenderer->MainRenderTextureDestRec.x, MainRenderer->MainRenderTextureDestRec.y, MainRenderer->MainRenderTextureDestRec.width, MainRenderer->MainRenderTextureDestRec.height}, 4, BLUE);
 
-    EndMode2D();
+    const char *WindowBox000Text = "Todo Item Details";
+    const char *SaveText = "Save";
+    const char *CancelButtonText = "Cancel";
+    const char *StatusText = "Not Started; In Progress; Completed";
+
+    bool DetailsEditMode = false;
+    char DetailsText[512];
+    bool StatusEditMode = false;
+    int StatusActive = 0;
+
+    // Draw Todo Item Details modal if ShowTodoItemDetails is true
+    if (StatusEditMode)
+    {
+        GuiLock();
+    }
+
+    if (ShowTodoItemDetails)
+    {
+        GuiUnlock();
+
+        TodoItem *SelectedTodoItem = GetSelectedTodoItem();
+
+        const int PosY = (GetScreenHeight() / 2) - (GetScreenHeight() / 10);
+        const int Width = GetScreenWidth() / 3;
+        const int Height = GetScreenHeight() / 5;
+        Rectangle ModalRec = (Rectangle){
+            (GetScreenWidth() / 2) - (Width / 2),
+            PosY,
+            Width,
+            Height};
+
+        ShowTodoItemDetails = !GuiWindowBox(ModalRec, WindowBox000Text);
+
+        // Calculate positions relative to ModalRec
+        float margin = 10; // Adjust margin as necessary
+
+        // Label for the title
+        GuiLabel((Rectangle){
+                     ModalRec.x + margin,
+                     ModalRec.y + margin,
+                     Width - 2 * margin,
+                     24},
+                 SelectedTodoItem->Title);
+
+        // TextBox for details
+        if (GuiTextBox((Rectangle){
+                           ModalRec.x + margin,
+                           ModalRec.y + 2 * margin + 24, // 24 height for label
+                           Width - 2 * margin,
+                           100},
+                       DetailsText, 128, DetailsEditMode)) // Adjust height as needed
+        {
+            DetailsEditMode = !DetailsEditMode;
+        }
+
+        // Save Button
+        if (GuiLabelButton((Rectangle){
+                               ModalRec.x + Width - 2 * margin - 72,
+                               ModalRec.y + Height - margin - 24,
+                               72, 24},
+                           SaveText))
+        {
+            SaveTodoItem();
+        }
+
+        // Cancel Button
+        if (GuiLabelButton((Rectangle){
+                               ModalRec.x + Width - 2 * margin - 72 - 64,
+                               ModalRec.y + Height - margin - 24,
+                               64, 24},
+                           CancelButtonText))
+        {
+            CancelButton();
+        }
+
+        // Dropdown for status
+        if (GuiDropdownBox((Rectangle){
+                               ModalRec.x + margin,
+                               ModalRec.y + Height - margin - 24,
+                               120, 24},
+                           StatusText, &StatusActive, StatusEditMode))
+        {
+            StatusEditMode = !StatusEditMode;
+        }
+    }
 
     // UI -----------------------------------------------------------------------
     const int FPS = GetFPS();
@@ -520,28 +584,37 @@ Render(float DeltaTime)
     DrawTextEx(MainFont, TextFormat("Virtual Mouse: %i x %i", (int)virtualMouse.x, (int)virtualMouse.y), (Vector2){10, 30}, 20, 0, BLACK);
     DrawTextEx(MainFont, TextFormat("Virtual Mouse: %i x %i", (int)virtualMouse.x, (int)virtualMouse.y), (Vector2){9, 29}, 20, 0, WHITE);
 
-    // Render texture position
-    DrawTextEx(MainFont, TextFormat("RenderTexture: %i x %i", SCREEN_WIDTH, SCREEN_HEIGHT), (Vector2){10, 60}, 20, 0, BLACK);
-    DrawTextEx(MainFont, TextFormat("RenderTexture: %i x %i", SCREEN_WIDTH, SCREEN_HEIGHT), (Vector2){9, 59}, 20, 0, WHITE);
+    // Actual Mouse Position
+    DrawTextEx(MainFont, TextFormat("Actual Mouse: %i x %i", (int)GetMousePosition().x, (int)GetMousePosition().y), (Vector2){10, 50}, 20, 0, BLACK);
+    DrawTextEx(MainFont, TextFormat("Actual Mouse: %i x %i", (int)GetMousePosition().x, (int)GetMousePosition().y), (Vector2){9, 49}, 20, 0, WHITE);
 
-    DrawTextEx(MainFont, TextFormat("Window: %i x %i", ScreenWidth, ScreenHeight), (Vector2){10, 90}, 20, 0, BLACK);
-    DrawTextEx(MainFont, TextFormat("Window: %i x %i", ScreenWidth, ScreenHeight), (Vector2){9, 89}, 20, 0, WHITE);
+    // Render texture position
+    DrawTextEx(MainFont, TextFormat("Render Texture: %i x %i", (int)MainRenderer->MainRenderTextureDestRec.x, (int)MainRenderer->MainRenderTextureDestRec.y), (Vector2){10, 70}, 20, 0, BLACK);
+    DrawTextEx(MainFont, TextFormat("Render Texture: %i x %i", (int)MainRenderer->MainRenderTextureDestRec.x, (int)MainRenderer->MainRenderTextureDestRec.y), (Vector2){9, 69}, 20, 0, WHITE);
+
+    // Window Size
+    DrawTextEx(MainFont, TextFormat("Window Size: %i x %i", GetScreenWidth(), GetScreenHeight()), (Vector2){10, 90}, 20, 0, BLACK);
+    DrawTextEx(MainFont, TextFormat("Window Size: %i x %i", GetScreenWidth(), GetScreenHeight()), (Vector2){9, 89}, 20, 0, WHITE);
 
     // SelectedTodoItem
-    DrawTextEx(MainFont, TextFormat("Selected Todo Item: %i", SelectedTodoItem), (Vector2){10, 120}, 20, 0, BLACK);
-    DrawTextEx(MainFont, TextFormat("Selected Todo Item: %i", SelectedTodoItem), (Vector2){9, 119}, 20, 0, WHITE);
+    DrawTextEx(MainFont, TextFormat("Selected Todo Item: %i", SelectedTodoItem), (Vector2){10, 110}, 20, 0, BLACK);
+    DrawTextEx(MainFont, TextFormat("Selected Todo Item: %i", SelectedTodoItem), (Vector2){9, 109}, 20, 0, WHITE);
 
     // ScreenSpaceCamera.offset.y
-    DrawTextEx(MainFont, TextFormat("Camera Offset Y: %f", ScreenSpaceCamera.offset.y), (Vector2){10, 180}, 20, 0, BLACK);
-    DrawTextEx(MainFont, TextFormat("Camera Offset Y: %f", ScreenSpaceCamera.offset.y), (Vector2){9, 179}, 20, 0, WHITE);
+    DrawTextEx(MainFont, TextFormat("Camera Offset Y: %f", ScreenSpaceCamera.offset.y), (Vector2){10, 130}, 20, 0, BLACK);
+    DrawTextEx(MainFont, TextFormat("Camera Offset Y: %f", ScreenSpaceCamera.offset.y), (Vector2){9, 129}, 20, 0, WHITE);
 
     // ScreenSpaceCamera.target.y
-    DrawTextEx(MainFont, TextFormat("Camera Target Y: %f", ScreenSpaceCamera.target.y), (Vector2){10, 210}, 20, 0, BLACK);
-    DrawTextEx(MainFont, TextFormat("Camera Target Y: %f", ScreenSpaceCamera.target.y), (Vector2){9, 209}, 20, 0, WHITE);
+    DrawTextEx(MainFont, TextFormat("Camera Target Y: %f", ScreenSpaceCamera.target.y), (Vector2){10, 170}, 20, 0, BLACK);
+    DrawTextEx(MainFont, TextFormat("Camera Target Y: %f", ScreenSpaceCamera.target.y), (Vector2){9, 169}, 20, 0, WHITE);
 
     // ShowTodoItemDetails
-    DrawTextEx(MainFont, TextFormat("Show Todo Item Details: %s", ShowTodoItemDetails ? "true" : "false"), (Vector2){10, 150}, 20, 0, BLACK);
-    DrawTextEx(MainFont, TextFormat("Show Todo Item Details: %s", ShowTodoItemDetails ? "true" : "false"), (Vector2){9, 149}, 20, 0, WHITE);
+    DrawTextEx(MainFont, TextFormat("ShowTodoItemDetails: %s", ShowTodoItemDetails ? "true" : "false"), (Vector2){10, 190}, 20, 0, BLACK);
+    DrawTextEx(MainFont, TextFormat("ShowTodoItemDetails: %s", ShowTodoItemDetails ? "true" : "false"), (Vector2){9, 189}, 20, 0, WHITE);
+
+    // GuiIsLocked
+    DrawTextEx(MainFont, TextFormat("GuiIsLocked: %s", GuiIsLocked() ? "true" : "false"), (Vector2){10, 210}, 20, 0, BLACK);
+    DrawTextEx(MainFont, TextFormat("GuiIsLocked: %s", GuiIsLocked() ? "true" : "false"), (Vector2){9, 209}, 20, 0, WHITE);
 
     EndDrawing();
 }
